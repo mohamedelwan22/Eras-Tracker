@@ -56,13 +56,13 @@ export default function OnThisDayPage() {
           </motion.div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-card rounded-2xl h-80 animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-card rounded-2xl h-80 animate-pulse border border-border" />
               ))}
             </div>
           ) : events.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {events.map((event, index) => (
                 <EventCard key={event.id} event={event} index={index} />
               ))}

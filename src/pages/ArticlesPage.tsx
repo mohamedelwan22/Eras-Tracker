@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
 import { ArticleCard } from '@/components/ArticleCard';
-import { getArticles } from '@/lib/api';
 import { Article } from '@/lib/types';
+import { STATIC_ARTICLES } from '@/data/staticArticles';
 
 export default function ArticlesPage() {
   const { t } = useApp();
@@ -12,19 +12,12 @@ export default function ArticlesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await getArticles();
-        if (response.success) {
-          setArticles(response.data.articles);
-        }
-      } catch (error) {
-        console.error('Error fetching articles:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticles();
+    // Simulate loading for smoother UX
+    const timer = setTimeout(() => {
+      setArticles(STATIC_ARTICLES);
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -42,13 +35,13 @@ export default function ArticlesPage() {
           </motion.div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-card rounded-2xl h-80 animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-card rounded-2xl h-80 animate-pulse border border-border" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {articles.map((article, index) => (
                 <ArticleCard key={article.id} article={article} index={index} />
               ))}

@@ -1,4 +1,4 @@
-// ErasTracker Types - Backend-ready interfaces
+// Eratracker Types - Backend-ready interfaces
 
 export interface Event {
   id: string;
@@ -26,7 +26,7 @@ export interface Event {
   updatedAt: string;
 }
 
-export type EventCategory = 
+export type EventCategory =
   | 'science'
   | 'politics'
   | 'war'
@@ -78,7 +78,7 @@ export interface Author {
 }
 
 export interface SearchParams {
-  year: number;
+  year?: number;
   month?: number;
   day?: number;
   category?: EventCategory;
@@ -151,4 +151,17 @@ export interface LocaleConfig {
   name: string;
   nativeName: string;
   direction: Direction;
+}
+export interface WikiPreviewData {
+  title: string;
+  imageUrl?: string;
+  previewContent: string;
+  sourceUrl: string;
+  attribution: string;
+}
+
+export interface WikiPreviewResponse {
+  success: boolean;
+  data: WikiPreviewData;
+  error?: string;
 }

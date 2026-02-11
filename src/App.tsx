@@ -13,7 +13,8 @@ import ArticlesPage from "./pages/ArticlesPage";
 import ArticleDetailPage from "./pages/ArticleDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
-import PrivacyPage from "./pages/PrivacyPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ExternalEventPreview from "./pages/ExternalEventPreview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,7 +36,8 @@ const App = () => (
             <Route path="/articles/:slug" element={<ArticleDetailPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/preview/:id" element={<ExternalEventPreview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

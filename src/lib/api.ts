@@ -5,7 +5,8 @@ import {
   EventResponse,
   ArticlesResponse,
   ArticleResponse,
-  OnThisDayResponse
+  OnThisDayResponse,
+  WikiPreviewResponse
 } from './types';
 
 // Axios instance configured for backend integration
@@ -21,15 +22,13 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.error || error.message || 'An error occurred';
-    console.error('API Error:', message);
     return Promise.reject(error);
   }
 );
 
 // Search events
-export async function searchEvents(params: SearchParams): Promise<SearchResponse> {
-  const response = await api.post<SearchResponse>('/search', params);
+export async function searchEvents(params: SearchParams, config?: { signal?: AbortSignal }): Promise<SearchResponse> {
+  const response = await api.post<SearchResponse>('/search', params, config);
   return response.data;
 }
 
@@ -72,6 +71,12 @@ export async function getArticleBySlug(slug: string): Promise<ArticleResponse> {
 // Get featured events (for homepage)
 export async function getFeaturedEvents(): Promise<SearchResponse> {
   const response = await api.get<SearchResponse>('/featured');
+  return response.data;
+}
+
+// Get rich Wikipedia preview
+export async function getWikipediaPreview(id: string): Promise<WikiPreviewResponse> {
+  const response = await api.get<WikiPreviewResponse>(`/event/wiki/preview/${id}`);
   return response.data;
 }
 

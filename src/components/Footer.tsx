@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
-import { Github, Twitter, Mail } from 'lucide-react';
+import { Phone, MessageCircle, Mail, Music2 } from 'lucide-react';
 
 export function Footer() {
   const { t } = useApp();
@@ -39,29 +39,43 @@ export function Footer() {
               >
                 <span className="text-primary-foreground font-display font-bold text-xl">E</span>
               </motion.div>
-              <span className="font-display text-xl font-semibold">ErasTracker</span>
+              <span className="font-display text-xl font-semibold">EraTracker</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md mb-6">
               {t('footer.description')}
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="#"
+                href="tel:+01210923756"
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title="Phone"
               >
-                <Twitter className="w-5 h-5" />
+                <Phone className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://wa.me/01210923756"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title="WhatsApp"
               >
-                <Github className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="mailto:Support@eratracker.com"
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title="Email"
               >
                 <Mail className="w-5 h-5" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@eratracker"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title="TikTok"
+              >
+                <Music2 className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -88,7 +102,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} ErasTracker. {t('footer.rights')}
+            © {currentYear} EraTracker. {t('footer.rights')}
           </p>
         </div>
       </div>

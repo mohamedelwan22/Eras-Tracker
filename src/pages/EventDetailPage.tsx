@@ -1,47 +1,51 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, ExternalLink, Share2, Tag } from 'lucide-react';
+import { useParams, Navigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Loader2, Info } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
-import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
-import { getEventById, searchEvents } from '@/lib/api';
+import { getEventById } from '@/lib/api';
 import { Event } from '@/lib/types';
-import { cn } from '@/lib/utils';
+
+// New Components
+import { EventHero } from '@/components/event/EventHero';
+import { EventMeta } from '@/components/event/EventMeta';
+import { EventContent } from '@/components/event/EventContent';
+import { EventSources } from '@/components/event/EventSources';
+import { EventTags } from '@/components/event/EventTags';
+import { RelatedEvents } from '@/components/event/RelatedEvents';
+import { Helmet } from 'react-helmet-async';
+import { buildTitle, buildDescription, buildCanonicalUrl, buildOgImage } from '@/utils/seo';
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, locale } = useApp();
   const [event, setEvent] = useState<Event | null>(null);
-  const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id) return;
+
+      // Safety rule: wiki- events go to /preview
+      if (id.startsWith('wiki-')) {
+        return; // Handled by Navigate below
+      }
+
       setLoading(true);
+      setError(null);
       try {
         const response = await getEventById(id);
         if (response.success) {
           setEvent(response.data);
-          
-          // Fetch related events
-          if (response.data.relatedEventIds?.length) {
-            const relatedRes = await searchEvents({
-              year: response.data.date.year,
-              category: response.data.category,
-              limit: 3,
-            });
-            if (relatedRes.success) {
-              setRelatedEvents(
-                relatedRes.data.events.filter((e) => e.id !== id).slice(0, 3)
-              );
-            }
-          }
+        } else {
+          setError(response.error || 'Event not found');
         }
-      } catch (error) {
-        console.error('Error fetching event:', error);
+      } catch (err) {
+        console.error('Error fetching event:', err);
+        setError('An unexpected error occurred.');
       } finally {
         setLoading(false);
       }
@@ -50,236 +54,123 @@ export default function EventDetailPage() {
     fetchEvent();
   }, [id]);
 
+  // Mandatory Safety Rule
+  if (id?.startsWith('wiki-')) {
+    return <Navigate to={`/preview/${id}`} replace />;
+  }
+
   if (loading) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-12">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 w-32 bg-muted rounded" />
-            <div className="aspect-video bg-muted rounded-2xl" />
-            <div className="h-12 w-3/4 bg-muted rounded" />
-            <div className="h-4 w-full bg-muted rounded" />
-            <div className="h-4 w-2/3 bg-muted rounded" />
-          </div>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-muted-foreground font-medium animate-pulse">{t('common.loading')}</p>
         </div>
       </Layout>
     );
   }
 
-  if (!event) {
+  if (error || !event) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-semibold mb-4">Event not found</h1>
-          <Button asChild>
-            <Link to="/search">{t('search.title')}</Link>
+        <div className="container mx-auto px-4 py-20 text-center max-w-lg">
+          <Info className="w-16 h-16 text-destructive mx-auto mb-6" />
+          <h1 className="text-3xl font-bold mb-4">{error || 'Event not found'}</h1>
+          <p className="text-muted-foreground mb-8">
+            The event you are looking for might have been removed or the ID is incorrect.
+          </p>
+          <Button asChild size="lg" className="rounded-xl">
+            <Link to="/search">{t('event.backToResults')}</Link>
           </Button>
         </div>
       </Layout>
     );
   }
 
-  const getLocalizedTitle = () => {
-    if (locale === 'ar' && event.titleAr) return event.titleAr;
-    if (locale === 'fr' && event.titleFr) return event.titleFr;
-    return event.title;
-  };
+  const title = locale === 'ar' ? event.titleAr || event.title :
+    locale === 'fr' ? event.titleFr || event.title :
+      event.title;
 
-  const getLocalizedDescription = () => {
-    if (locale === 'ar' && event.descriptionAr) return event.descriptionAr;
-    if (locale === 'fr' && event.descriptionFr) return event.descriptionFr;
-    return event.description;
-  };
+  const description = locale === 'ar' ? event.descriptionAr || event.description :
+    locale === 'fr' ? event.descriptionFr || event.description :
+      event.description;
 
-  const formatDate = () => {
-    const { year, month, day, era } = event.date;
-    const parts = [];
-    if (day) parts.push(day);
-    if (month) parts.push(t(`month.${month}`));
-    parts.push(Math.abs(year));
-    if (era === 'BCE') parts.push('BCE');
-    return parts.join(' ');
-  };
-
-  const importanceColors = {
-    low: 'bg-muted text-muted-foreground',
-    medium: 'bg-secondary/20 text-secondary',
-    high: 'bg-primary/20 text-primary',
-    critical: 'bg-primary text-primary-foreground',
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: getLocalizedTitle(),
-          text: getLocalizedDescription(),
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Event", "Article"],
+    "name": title,
+    "description": buildDescription(description),
+    "image": buildOgImage(event.imageUrl),
+    "datePublished": event.createdAt,
+    "dateModified": event.updatedAt,
+    "headline": title,
+    "articleBody": description,
+    "location": {
+      "@type": "Place",
+      "name": event.country || "Global"
+    },
+    "startDate": `${event.date.year}-01-01`
   };
 
   return (
     <Layout>
-      <article className="py-12">
-        <div className="container mx-auto px-4">
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="mb-8"
-          >
+      <Helmet>
+        <title>{buildTitle(`${title} (${event.date.year} ${event.date.era})`)}</title>
+        <meta name="description" content={buildDescription(description)} />
+        <link rel="canonical" href={buildCanonicalUrl(`/event/${id}`)} />
+        <meta property="og:title" content={buildTitle(title)} />
+        <meta property="og:description" content={buildDescription(description)} />
+        <meta property="og:image" content={buildOgImage(event.imageUrl)} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      </Helmet>
+      <div className="min-h-screen bg-background">
+        {/* Floating Back Button */}
+        <div className="absolute top-24 left-4 z-50 md:fixed">
+          <div className="container mx-auto px-4">
             <Link
-              to="/results"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              to="#"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.back();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all shadow-lg"
             >
-              <ArrowLeft className="w-4 h-4" />
-              {t('event.backToResults')}
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+              <span className="font-medium text-sm">{t('event.backToResults')}</span>
             </Link>
-          </motion.div>
-
-          <div className="max-w-4xl mx-auto">
-            {/* Header Image */}
-            {event.imageUrl && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative aspect-video rounded-2xl overflow-hidden mb-8"
-              >
-                <img
-                  src={event.imageUrl}
-                  alt={getLocalizedTitle()}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                
-                {/* Badges */}
-                <div className="absolute top-6 start-6 flex gap-2">
-                  <span className="category-badge">
-                    {t(`category.${event.category}`)}
-                  </span>
-                  <span className={cn('px-3 py-1 rounded-full text-sm font-medium', importanceColors[event.importance])}>
-                    {event.importance}
-                  </span>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              {/* Title */}
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                {getLocalizedTitle()}
-              </h1>
-
-              {/* Meta */}
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-8 pb-8 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span className="font-medium">{formatDate()}</span>
-                </div>
-                {event.country && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    <span>{event.country}</span>
-                  </div>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleShare}
-                  className="ms-auto"
-                >
-                  <Share2 className="w-4 h-4 me-2" />
-                  {t('event.share')}
-                </Button>
-              </div>
-
-              {/* Description */}
-              <div className="prose prose-lg max-w-none mb-12">
-                <p className="text-lg leading-relaxed text-foreground">
-                  {getLocalizedDescription()}
-                </p>
-              </div>
-
-              {/* Tags */}
-              {event.tags.length > 0 && (
-                <div className="mb-12">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <Tag className="w-5 h-5" />
-                    Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {event.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Sources */}
-              {event.sources.length > 0 && (
-                <div className="bg-muted/50 rounded-2xl p-6 mb-12">
-                  <h3 className="font-display text-xl font-semibold mb-4">
-                    {t('event.sources')}
-                  </h3>
-                  <ul className="space-y-3">
-                    {event.sources.map((source, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <ExternalLink className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
-                        {source.url ? (
-                          <a
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {source.title}
-                          </a>
-                        ) : (
-                          <span className="text-foreground">{source.title}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Related Events */}
-            {relatedEvents.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h3 className="font-display text-2xl font-semibold mb-6">
-                  {t('event.relatedEvents')}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {relatedEvents.map((event, index) => (
-                    <EventCard key={event.id} event={event} index={index} />
-                  ))}
-                </div>
-              </motion.div>
-            )}
           </div>
         </div>
-      </article>
+
+        <article className="pb-24">
+          <EventHero
+            title={title}
+            imageUrl={event.imageUrl}
+            category={event.category}
+          />
+
+          <div className="container mx-auto px-4 max-w-4xl">
+            <EventMeta
+              year={event.date.year}
+              era={event.date.era}
+              category={event.category}
+              importance={event.importance}
+              country={event.country}
+            />
+
+            <EventContent content={description} />
+
+            <EventTags tags={event.tags} />
+
+            <EventSources sources={event.sources} />
+
+            <RelatedEvents currentEvent={event} />
+          </div>
+        </article>
+      </div>
     </Layout>
   );
 }

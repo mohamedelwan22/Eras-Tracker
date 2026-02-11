@@ -1,0 +1,139 @@
+// Prisma Schema for ErasTracker
+// Matches frontend types from src/lib/types.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // DEVELOPMENT: SQLite for out-of-the-box local run
+  provider = "sqlite"
+  url      = "file:./dev.db"
+
+  // PRODUCTION: PostgreSQL (uncomment below and comment above to switch)
+  // provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+// Main Event model - stores historical and scientific events
+model Event {
+  id              String    @id @default(cuid())
+  
+  // Multilingual titles
+  title           String    // English (default)
+  titleAr         String?   @map("title_ar")
+  titleFr         String?   @map("title_fr")
+  
+  // Multilingual descriptions
+  description     String
+  descriptionAr   String?   @map("description_ar")
+  descriptionFr   String?   @map("description_fr")
+  
+  // Date fields
+  year            Int
+  month           Int?
+  day             Int?
+  era             String    @default("CE") // "CE" or "BCE"
+  
+  // Classification
+  category        String    // science, politics, war, culture, etc.
+  country         String?
+  countryCode     String?   @map("country_code")
+  
+  // Importance level: low, medium, high, critical
+  importance      String    @default("medium")
+  
+  // Media and sources
+  imageUrl        String?   @map("image_url")
+  sources         String    @default("[]") // JSON String of Source objects
+  
+  // Related events
+  relatedEventIds String    @map("related_event_ids") @default("[]") // JSON String of IDs
+  
+  // Tags for search
+  tags            String    @default("[]") // JSON String
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([year, month, day])
+  @@index([category])
+  @@index([countryCode])
+  @@index([importance])
+  @@map("events")
+}
+
+// Article model - curated educational articles
+model Article {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  
+  // Multilingual titles
+  title           String
+  titleAr         String?   @map("title_ar")
+  titleFr         String?   @map("title_fr")
+  
+  // Multilingual excerpts
+  excerpt         String
+  excerptAr       String?   @map("excerpt_ar")
+  excerptFr       String?   @map("excerpt_fr")
+  
+  // Multilingual content
+  content         String
+  contentAr       String?   @map("content_ar")
+  contentFr       String?   @map("content_fr")
+  
+  // Media
+  coverImageUrl   String    @map("cover_image_url")
+  
+  // Author information
+  author          String    // JSON String
+  
+  // Classification
+  category        String
+  tags            String    @default("[]") // JSON String
+  readingTime     Int       @map("reading_time") @default(5)
+  
+  // Publishing
+  published       Boolean   @default(false)
+  publishedAt     DateTime? @map("published_at")
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([category])
+  @@index([published])
+  @@map("articles")
+}
+
+// CachedSearch model - caches API responses for performance
+model CachedSearch {
+  id              String    @id @default(cuid())
+  queryHash       String    @unique @map("query_hash")
+  queryParams     String    @map("query_params") // JSON String
+  results         String    // JSON String
+  language        String    @default("en")
+  expiresAt       DateTime  @map("expires_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([queryHash])
+  @@index([expiresAt])
+  @@map("cached_searches")
+}
+
+// Analytics model - tracks user interactions
+model Analytics {
+  id              String    @id @default(cuid())
+  eventType       String    @map("event_type") // search, view, click
+  eventData       String    @map("event_data") // JSON String
+  userAgent       String?   @map("user_agent")
+  ipHash          String?   @map("ip_hash") // Hashed for privacy
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("analytics")
+}

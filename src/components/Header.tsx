@@ -41,7 +41,7 @@ export function Header() {
             <span className="text-primary-foreground font-display font-bold text-xl">E</span>
           </motion.div>
           <span className="font-display text-xl font-semibold text-foreground hidden sm:block">
-            ErasTracker
+            EraTracker
           </span>
         </Link>
 

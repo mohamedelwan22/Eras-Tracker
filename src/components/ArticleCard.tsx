@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, User } from 'lucide-react';
+import { Clock, ArrowRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 
@@ -26,56 +26,65 @@ export function ArticleCard({ article, index = 0 }: ArticleCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
     >
       <Link to={`/articles/${article.slug}`}>
         <motion.article
-          className="group bg-card rounded-2xl overflow-hidden border border-border card-hover h-full"
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
+          className="group grid grid-cols-1 md:grid-cols-12 bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 h-full"
+          whileHover={{ y: -2 }}
         >
-          {/* Image */}
-          <div className="relative aspect-[16/9] overflow-hidden">
+          {/* Image Part - 40% on Desktop */}
+          <div className="md:col-span-4 relative aspect-video md:aspect-auto overflow-hidden bg-muted">
             <img
               src={article.coverImageUrl}
               alt={getLocalizedTitle()}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
-            
-            {/* Category Badge */}
-            <div className="absolute top-4 start-4">
-              <span className="category-badge">{article.category}</span>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
 
-          {/* Content */}
-          <div className="p-5 space-y-3">
-            <h3 className="font-display text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          {/* Content Part - 60% on Desktop */}
+          <div className="md:col-span-8 p-6 md:p-8 flex flex-col">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase tracking-tight">
+                {article.category}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                <Clock className="w-3 h-3" />
+                <span>{t('articles.readingTime', { minutes: article.readingTime })}</span>
+              </div>
+            </div>
+
+            <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground line-clamp-2 leading-tight mb-4 group-hover:text-primary transition-colors text-start">
               {getLocalizedTitle()}
             </h3>
 
-            <p className="text-muted-foreground text-sm line-clamp-2">
+            <p className="text-muted-foreground text-base leading-relaxed line-clamp-3 mb-6 text-start">
               {getLocalizedExcerpt()}
             </p>
 
-            {/* Meta */}
-            <div className="flex items-center justify-between pt-3 border-t border-border">
+            <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/30">
               <div className="flex items-center gap-2">
-                {article.author.avatarUrl && (
+                {article.author.id === 'eras-team' ? (
+                  <div className="w-6 h-6 rounded-full bg-gradient-accent flex items-center justify-center border border-border">
+                    <span className="text-primary-foreground font-display font-bold text-[10px]">E</span>
+                  </div>
+                ) : article.author.avatarUrl ? (
                   <img
                     src={article.author.avatarUrl}
                     alt={article.author.name}
-                    className="w-6 h-6 rounded-full object-cover"
+                    className="w-6 h-6 rounded-full object-cover border border-border"
                   />
-                )}
-                <span className="text-xs text-muted-foreground">{article.author.name}</span>
+                ) : null}
+                <span className="text-xs font-medium text-muted-foreground">{article.author.name}</span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{t('articles.readingTime', { minutes: article.readingTime })}</span>
+
+              <div className="flex items-center gap-1.5 text-primary text-sm font-bold group-hover:gap-2.5 transition-all rtl:flex-row-reverse">
+                {t('articles.readMore')}
+                <ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { ArrowLeft, Clock, User } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { getArticleBySlug } from '@/lib/api';
+import { STATIC_ARTICLES } from '@/data/staticArticles';
 import { Article } from '@/lib/types';
 
 export default function ArticleDetailPage() {
@@ -15,18 +15,13 @@ export default function ArticleDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      if (!slug) return;
-      try {
-        const response = await getArticleBySlug(slug);
-        if (response.success) setArticle(response.data);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticle();
+    // Simulate loading for smoother UX
+    const timer = setTimeout(() => {
+      const foundArticle = STATIC_ARTICLES.find(a => a.slug === slug);
+      setArticle(foundArticle || null);
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
   }, [slug]);
 
   if (loading) {
@@ -78,10 +73,16 @@ export default function ArticleDetailPage() {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <h1 className="font-display text-3xl sm:text-4xl font-bold mb-6">{title}</h1>
-              
+
               <div className="flex items-center gap-4 mb-8 pb-8 border-b border-border">
                 <div className="flex items-center gap-2">
-                  {article.author.avatarUrl && <img src={article.author.avatarUrl} alt={article.author.name} className="w-10 h-10 rounded-full" />}
+                  {article.author.id === 'eras-team' ? (
+                    <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center border border-border">
+                      <span className="text-primary-foreground font-display font-bold text-lg">E</span>
+                    </div>
+                  ) : article.author.avatarUrl && (
+                    <img src={article.author.avatarUrl} alt={article.author.name} className="w-10 h-10 rounded-full" />
+                  )}
                   <span className="text-muted-foreground">{article.author.name}</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
@@ -90,8 +91,13 @@ export default function ArticleDetailPage() {
                 </div>
               </div>
 
-              <div className="prose prose-lg max-w-none">
-                <p className="text-lg leading-relaxed">{content}</p>
+              <div className="prose prose-lg max-w-none text-foreground">
+                <p className="text-lg leading-relaxed whitespace-pre-wrap font-sans">
+                  {content}
+                </p>
+                <div className="mt-12 pt-8 border-t border-border text-center text-muted-foreground text-sm italic">
+                  This article is original content published on the ErasTracker platform.
+                </div>
               </div>
             </motion.div>
           </div>

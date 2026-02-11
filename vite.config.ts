@@ -11,6 +11,17 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
+  base: "/",
+  build: {
+    outDir: "public_html",
+    emptyOutDir: true,
   },
   plugins: [react()],
   resolve: {

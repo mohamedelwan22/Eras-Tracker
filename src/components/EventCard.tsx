@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Tag } from 'lucide-react';
-import { Event, Locale } from '@/lib/types';
+import { Calendar, MapPin, Tag, ArrowRight } from 'lucide-react';
+import { Event } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
+import { stripHtml } from '@/utils/stripHtml';
 
 interface EventCardProps {
   event: Event;
@@ -14,113 +15,121 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
   const { locale, t } = useApp();
 
   const getLocalizedTitle = () => {
-    if (locale === 'ar' && event.titleAr) return event.titleAr;
-    if (locale === 'fr' && event.titleFr) return event.titleFr;
-    return event.title;
+    let title = event.title;
+    if (locale === 'ar' && event.titleAr) title = event.titleAr;
+    else if (locale === 'fr' && event.titleFr) title = event.titleFr;
+    return stripHtml(title);
   };
 
   const getLocalizedDescription = () => {
-    if (locale === 'ar' && event.descriptionAr) return event.descriptionAr;
-    if (locale === 'fr' && event.descriptionFr) return event.descriptionFr;
-    return event.description;
+    let description = event.description;
+    if (locale === 'ar' && event.descriptionAr) description = event.descriptionAr;
+    else if (locale === 'fr' && event.descriptionFr) description = event.descriptionFr;
+    return stripHtml(description);
   };
 
-  const formatDate = () => {
-    const { year, month, day, era } = event.date;
-    const parts = [];
-    if (day) parts.push(day);
-    if (month) parts.push(t(`month.${month}`));
-    parts.push(Math.abs(year));
-    if (era === 'BCE') parts.push('BCE');
-    return parts.join(' ');
+  const getFallbackImage = (category: string) => {
+    const fallbacks: Record<string, string> = {
+      war: 'https://images.unsplash.com/photo-1505373633519-c0ae2f1b490f',
+      science: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31',
+      culture: 'https://images.unsplash.com/photo-1467307983825-619715426c70',
+      politics: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620',
+      discovery: 'https://images.unsplash.com/photo-1500076656116-558758c991c1',
+      space: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa',
+      natural_disaster: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2',
+      medicine: 'https://images.unsplash.com/photo-1576091160550-217359f488d5',
+      religion: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3',
+      economics: 'https://images.unsplash.com/photo-1611974717482-58a00f9397f0',
+      sports: 'https://images.unsplash.com/photo-1461896756913-7597af659228',
+      art: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b',
+      literature: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d',
+      default: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa'
+    };
+    return `${fallbacks[category] || fallbacks.default}?q=80&w=1200&auto=format&fit=crop`;
   };
 
   const importanceColors = {
-    low: 'bg-muted text-muted-foreground',
-    medium: 'bg-secondary/20 text-secondary',
-    high: 'bg-primary/20 text-primary',
-    critical: 'bg-primary text-primary-foreground',
+    low: 'text-slate-500 bg-slate-500/10',
+    medium: 'text-blue-500 bg-blue-500/10',
+    high: 'text-orange-500 bg-orange-500/10',
+    critical: 'text-red-500 bg-red-500/10',
+  };
+
+  const imageUrl = event.imageUrl || getFallbackImage(event.category);
+
+  const isExternal = String(event.id).startsWith('wiki-') || (event.sources && event.sources.some(s => s.title.toLowerCase().includes('wikipedia')));
+
+  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
+    const to = isExternal ? `/preview/${event.id}` : `/event/${event.id}`;
+    return (
+      <Link to={to} state={{ event }} className="block h-full">
+        {children}
+      </Link>
+    );
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
     >
-      <Link to={`/event/${event.id}`}>
+      <CardWrapper>
         <motion.article
-          className="group bg-card rounded-2xl overflow-hidden border border-border card-hover h-full"
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
+          className="group grid grid-cols-1 md:grid-cols-12 bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 h-full"
+          whileHover={{ y: -2 }}
         >
-          {/* Image */}
-          {event.imageUrl && (
-            <div className="relative aspect-video overflow-hidden">
-              <img
-                src={event.imageUrl}
-                alt={getLocalizedTitle()}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
-              
-              {/* Category Badge */}
-              <div className="absolute top-4 start-4">
-                <span className="category-badge">
-                  {t(`category.${event.category}`)}
-                </span>
-              </div>
-              
-              {/* Importance Badge */}
-              <div className="absolute top-4 end-4">
-                <span className={cn('px-2 py-1 rounded-full text-xs font-medium', importanceColors[event.importance])}>
-                  {event.importance}
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Image Part - 40% on Desktop */}
+          <div className="md:col-span-4 relative aspect-video md:aspect-auto overflow-hidden bg-muted">
+            <img
+              src={imageUrl}
+              alt={getLocalizedTitle()}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          </div>
 
-          {/* Content */}
-          <div className="p-5 space-y-3">
-            <h3 className="font-display text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          {/* Content Part - 60% on Desktop */}
+          <div className="md:col-span-8 p-6 md:p-8 flex flex-col">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-primary font-bold text-sm tracking-wider uppercase text-start">
+                {event.date.year} {event.date.era}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground uppercase tracking-tight">
+                {t(`category.${event.category}`)}
+              </span>
+              <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest', importanceColors[event.importance])}>
+                {event.importance}
+              </span>
+            </div>
+
+            <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground line-clamp-2 leading-tight mb-4 group-hover:text-primary transition-colors text-start">
               {getLocalizedTitle()}
             </h3>
 
-            <p className="text-muted-foreground text-sm line-clamp-2">
+            <p className="text-muted-foreground text-base leading-relaxed text-start mb-6 line-clamp-3">
               {getLocalizedDescription()}
             </p>
 
-            {/* Meta */}
-            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-2">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>{formatDate()}</span>
+            <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/30">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {event.country && (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-md">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    <span>{event.country}</span>
+                  </div>
+                )}
               </div>
-              {event.country && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>{event.country}</span>
-                </div>
-              )}
-            </div>
 
-            {/* Tags */}
-            {event.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-2">
-                {event.tags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs"
-                  >
-                    <Tag className="w-3 h-3" />
-                    {tag}
-                  </span>
-                ))}
+              <div className="flex items-center gap-1.5 text-primary text-sm font-bold group-hover:gap-2.5 transition-all rtl:flex-row-reverse">
+                {t('articles.readMore')}
+                <ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </div>
-            )}
+            </div>
           </div>
         </motion.article>
-      </Link>
+      </CardWrapper>
     </motion.div>
   );
 }

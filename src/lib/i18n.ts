@@ -1,12 +1,12 @@
 import { Locale, LocaleConfig, Direction } from './types';
 
 export const locales: LocaleConfig[] = [
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
   { code: 'en', name: 'English', nativeName: 'English', direction: 'ltr' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
   { code: 'fr', name: 'French', nativeName: 'Français', direction: 'ltr' },
 ];
 
-export const defaultLocale: Locale = 'ar';
+export const defaultLocale: Locale = 'en';
 
 export const translations = {
   ar: {
@@ -20,7 +20,7 @@ export const translations = {
     'nav.contact': 'اتصل بنا',
 
     // Hero
-    'hero.title': 'ErasTracker',
+    'hero.title': 'EraTracker',
     'hero.subtitle': 'تتبع التاريخ والعلوم عبر الزمن',
     'hero.description': 'اكتشف الأحداث التاريخية والعلمية المهمة من جميع أنحاء العالم. رحلة عبر الزمن لفهم كيف شكّل الماضي حاضرنا.',
     'hero.searchPlaceholder': 'ابحث عن أحداث تاريخية...',
@@ -59,6 +59,8 @@ export const translations = {
     'event.relatedEvents': 'أحداث ذات صلة',
     'event.share': 'مشاركة',
     'event.backToResults': 'العودة للنتائج',
+    'event.readFullOnWikipedia': 'اقرأ المقال كاملًا على ويكيبيديا',
+    'event.externalDisclaimer': '* سيتم نقلك إلى موقع ويكيبيديا لقراءة القصة الكاملة.',
 
     // On This Day
     'onThisDay.title': 'في مثل هذا اليوم',
@@ -143,7 +145,7 @@ export const translations = {
     'nav.contact': 'Contact',
 
     // Hero
-    'hero.title': 'ErasTracker',
+    'hero.title': 'EraTracker',
     'hero.subtitle': 'Track history and science across time',
     'hero.description': 'Discover important historical and scientific events from around the world. A journey through time to understand how the past shaped our present.',
     'hero.searchPlaceholder': 'Search for historical events...',
@@ -182,6 +184,8 @@ export const translations = {
     'event.relatedEvents': 'Related Events',
     'event.share': 'Share',
     'event.backToResults': 'Back to Results',
+    'event.readFullOnWikipedia': 'Read full article on Wikipedia',
+    'event.externalDisclaimer': '* You will be redirected to Wikipedia to read the full story.',
 
     // On This Day
     'onThisDay.title': 'On This Day',
@@ -266,7 +270,7 @@ export const translations = {
     'nav.contact': 'Contact',
 
     // Hero
-    'hero.title': 'ErasTracker',
+    'hero.title': 'EraTracker',
     'hero.subtitle': "Suivez l'histoire et la science à travers le temps",
     'hero.description': "Découvrez les événements historiques et scientifiques importants du monde entier. Un voyage dans le temps pour comprendre comment le passé a façonné notre présent.",
     'hero.searchPlaceholder': 'Rechercher des événements historiques...',
@@ -305,6 +309,8 @@ export const translations = {
     'event.relatedEvents': 'Événements Connexes',
     'event.share': 'Partager',
     'event.backToResults': 'Retour aux Résultats',
+    'event.readFullOnWikipedia': "Lire l'article complet sur Wikipédia",
+    'event.externalDisclaimer': "* Vous serez redirigé vers Wikipédia pour lire l'histoire complète.",
 
     // On This Day
     'onThisDay.title': 'Ce Jour-là',

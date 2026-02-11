@@ -1,17 +1,23 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Calendar, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, ArrowRight, Sparkles, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
 import { Hero3D } from '@/components/Hero3D';
-import { EventCard } from '@/components/EventCard';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getFeaturedEvents, getArticles, getOnThisDay } from '@/lib/api';
-import { Event, Article } from '@/lib/types';
+import { getArticles } from '@/lib/api';
+import { Article } from '@/lib/types';
 import { categories } from '@/lib/mocks';
+import { Helmet } from 'react-helmet-async';
+import { buildTitle, buildDescription, buildCanonicalUrl, buildOgImage } from '@/utils/seo';
+
+// Import new integrated components
+import { FeaturedEvents } from '@/components/home/FeaturedEvents';
+import { RandomEvents } from '@/components/home/RandomEvents';
+import { OnThisDay } from '@/components/home/OnThisDay';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -35,34 +41,27 @@ const itemVariants = {
 };
 
 export default function HomePage() {
-  const { t, direction } = useApp();
+  const { t } = useApp();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
-  const [todayEvents, setTodayEvents] = useState<Event[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingArticles, setLoadingArticles] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadArticles = async () => {
       try {
-        const [featuredRes, articlesRes, todayRes] = await Promise.all([
-          getFeaturedEvents(),
-          getArticles(1, 3),
-          getOnThisDay(new Date().getMonth() + 1, new Date().getDate()),
-        ]);
-
-        if (featuredRes.success) setFeaturedEvents(featuredRes.data.events);
-        if (articlesRes.success) setArticles(articlesRes.data.articles);
-        if (todayRes.success) setTodayEvents(todayRes.data.events.slice(0, 3));
+        const response = await getArticles(1, 3);
+        if (response.success) {
+          setArticles(response.data.articles);
+        }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading articles:', error);
       } finally {
-        setLoading(false);
+        setLoadingArticles(false);
       }
     };
 
-    loadData();
+    loadArticles();
   }, []);
 
   const handleQuickSearch = (e: React.FormEvent) => {
@@ -79,10 +78,20 @@ export default function HomePage() {
 
   return (
     <Layout>
+      <Helmet>
+        <title>{buildTitle()}</title>
+        <meta name="description" content={buildDescription()} />
+        <link rel="canonical" href={buildCanonicalUrl('/')} />
+        <meta property="og:title" content={buildTitle()} />
+        <meta property="og:description" content={buildDescription()} />
+        <meta property="og:image" content={buildOgImage()} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden hero-pattern">
         <Hero3D />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             className="max-w-4xl mx-auto text-center"
@@ -206,81 +215,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Events */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center justify-between mb-12"
-          >
-            <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">
-                {t('nav.search')}
-              </h2>
-              <p className="text-muted-foreground">{t('hero.description')}</p>
-            </div>
-            <Button variant="outline" asChild className="hidden sm:flex gap-2">
-              <Link to="/search">
-                {t('common.viewAll')}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
-          </motion.div>
+      {/* 1. Featured Events Section */}
+      <FeaturedEvents />
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-card rounded-2xl h-80 animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredEvents.map((event, index) => (
-                <EventCard key={event.id} event={event} index={index} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* 2. Random Events Section */}
+      <RandomEvents />
 
-      {/* On This Day Preview */}
-      {todayEvents.length > 0 && (
-        <section className="py-20 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex items-center justify-between mb-12"
-            >
-              <div>
-                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">
-                  {t('nav.onThisDay')}
-                </h2>
-                <p className="text-muted-foreground">
-                  {t('onThisDay.subtitle', {
-                    date: new Date().toLocaleDateString(),
-                  })}
-                </p>
-              </div>
-              <Button variant="outline" asChild className="hidden sm:flex gap-2">
-                <Link to="/on-this-day">
-                  {t('common.viewAll')}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </Button>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {todayEvents.map((event, index) => (
-                <EventCard key={event.id} event={event} index={index} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* 3. On This Day Section */}
+      <OnThisDay />
 
       {/* Articles Section */}
       <section className="py-20">
@@ -304,11 +246,19 @@ export default function HomePage() {
             </Button>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article, index) => (
-              <ArticleCard key={article.id} article={article} index={index} />
-            ))}
-          </div>
+          {loadingArticles ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-64 bg-muted animate-pulse rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {articles.map((article, index) => (
+                <ArticleCard key={article.id} article={article} index={index} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </Layout>

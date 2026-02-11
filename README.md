@@ -1,4 +1,4 @@
-# ErasTracker
+# Eratracker
 
 A historical events explorer application allowing users to discover events across different eras, view detailed articles, and search with advanced filtering.
 
