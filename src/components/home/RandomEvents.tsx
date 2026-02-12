@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
-import { getRandomEvents } from '@/lib/api';
+import { getRandomEvents } from '@/config/api';
 import { Event } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 

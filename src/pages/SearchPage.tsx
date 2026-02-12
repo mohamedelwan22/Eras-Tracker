@@ -7,7 +7,7 @@ import { Layout } from '@/components/Layout';
 import { SearchForm } from '@/components/search/SearchForm';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchPagination } from '@/components/search/SearchPagination';
-import { searchEvents } from '@/lib/api';
+import { searchEvents } from '@/config/api';
 import { Event, SearchParams } from '@/lib/types';
 import { Helmet } from 'react-helmet-async';
 import { buildTitle, buildDescription, buildCanonicalUrl } from '@/utils/seo';
@@ -100,7 +100,7 @@ export default function SearchPage() {
     if (currentParams.year || currentParams.query) {
       handleSearch(currentParams);
     }
-    
+
     return () => abortControllerRef.current?.abort();
   }, [searchKey, handleSearch]); // Uses stable searchKey
 

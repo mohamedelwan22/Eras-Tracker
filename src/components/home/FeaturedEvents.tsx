@@ -4,7 +4,7 @@ import { ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
-import { getFeaturedEvents } from '@/lib/api';
+import { getFeaturedEvents } from '@/config/api';
 import { Event } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 

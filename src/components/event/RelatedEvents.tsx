@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Event } from '@/lib/types';
-import { searchEvents } from '@/lib/api';
+import { searchEvents } from '@/config/api';
 import { RelatedEventCard } from './RelatedEventCard';
 import { Loader2 } from 'lucide-react';
 

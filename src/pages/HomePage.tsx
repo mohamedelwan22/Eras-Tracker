@@ -8,7 +8,7 @@ import { Hero3D } from '@/components/Hero3D';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getArticles } from '@/lib/api';
+import { getArticles } from '@/config/api';
 import { Article } from '@/lib/types';
 import { categories } from '@/lib/mocks';
 import { Helmet } from 'react-helmet-async';

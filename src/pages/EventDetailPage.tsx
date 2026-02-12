@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2, Info } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { getEventById } from '@/lib/api';
+import { getEventById } from '@/config/api';
 import { Event } from '@/lib/types';
 
 // New Components

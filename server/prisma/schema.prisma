@@ -6,13 +6,8 @@ generator client {
 }
 
 datasource db {
-  // DEVELOPMENT: SQLite for out-of-the-box local run
   provider = "sqlite"
-  url      = "file:./dev.db"
-
-  // PRODUCTION: PostgreSQL (uncomment below and comment above to switch)
-  // provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 // Main Event model - stores historical and scientific events

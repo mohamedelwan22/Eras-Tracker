@@ -5,7 +5,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/Layout';
 import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
-import { getOnThisDay } from '@/lib/api';
+import { getOnThisDay } from '@/config/api';
 import { Event } from '@/lib/types';
 
 export default function OnThisDayPage() {

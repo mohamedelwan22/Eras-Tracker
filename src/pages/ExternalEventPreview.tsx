@@ -7,7 +7,7 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { stripHtml } from '@/utils/stripHtml';
 import { Event, WikiPreviewData } from '@/lib/types';
-import { getWikipediaPreview } from '@/lib/api';
+import { getWikipediaPreview } from '@/config/api';
 
 export default function ExternalEventPreview() {
     const { id } = useParams<{ id: string }>();

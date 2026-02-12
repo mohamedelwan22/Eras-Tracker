@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { searchEvents } from '@/lib/api';
+import { searchEvents } from '@/config/api';
 import { Event, SearchParams } from '@/lib/types';
 
 export default function ResultsPage() {

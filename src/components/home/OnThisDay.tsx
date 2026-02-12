@@ -4,7 +4,7 @@ import { Calendar, ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
-import { getOnThisDay } from '@/lib/api';
+import { getOnThisDay } from '@/config/api';
 import { Event } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 
