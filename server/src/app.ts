@@ -8,7 +8,8 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: config.corsOrigin,
+    origin: 'https://eratracker.com',
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));

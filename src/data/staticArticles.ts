@@ -85,6 +85,8 @@ The 21st century is the century of scientific convergence, where biology meets c
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar1.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -236,6 +238,8 @@ Share your thoughts in the comments: What do you think could have changed the In
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar2.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -308,6 +312,8 @@ And the question for you: Do you see any parallels between the dot-com bubble an
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar3.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -340,6 +346,8 @@ In the end, the idea is not to reject progress, but to remember that the beating
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar4.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -452,6 +460,8 @@ These ten wars shaped the course of human history and reshaped political borders
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar5.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -553,6 +563,8 @@ We are still living with its consequences, from climate change rooted in fossil 
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar6.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
@@ -710,6 +722,8 @@ Choosing energy sources is a major challenge for humanity in the 21st century. W
 This article is original content published on the Eratracker platform.`,
         coverImageUrl: '/ar7.jfif',
         publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        category: 'Science',
         author: {
             id: 'eras-team',
             name: 'Eratracker Team',
