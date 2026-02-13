@@ -16,7 +16,6 @@ import { buildTitle, buildDescription, buildCanonicalUrl, buildOgImage } from '@
 
 // Import new integrated components
 import { FeaturedEvents } from '@/components/home/FeaturedEvents';
-import { RandomEvents } from '@/components/home/RandomEvents';
 import { OnThisDay } from '@/components/home/OnThisDay';
 
 const containerVariants = {
@@ -218,10 +217,7 @@ export default function HomePage() {
       {/* 1. Featured Events Section */}
       <FeaturedEvents />
 
-      {/* 2. Random Events Section */}
-      <RandomEvents />
-
-      {/* 3. On This Day Section */}
+      {/* 2. On This Day Section */}
       <OnThisDay />
 
       {/* Articles Section */}

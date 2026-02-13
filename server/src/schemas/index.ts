@@ -48,7 +48,7 @@ export const onThisDayParamsSchema = z.object({
 // ============================================
 
 export const randomParamsSchema = z.object({
-    count: z.coerce.number().int().min(1).max(20).default(5),
+    limit: z.coerce.number().int().min(1).max(12).default(12),
     category: categoryEnum.optional(),
 });
 

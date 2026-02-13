@@ -43,6 +43,9 @@ export function Header() {
           <span className="font-display text-xl font-semibold text-foreground hidden sm:block">
             EraTracker
           </span>
+          <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/30 flex items-center justify-center self-center h-fit">
+            BETA
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

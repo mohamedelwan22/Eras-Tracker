@@ -176,23 +176,69 @@ export async function getRandomEvents(
 ) {
   try {
     const params = randomParamsSchema.parse(req.query);
+    const limit = Math.min(params.limit, 12); // Hard cap at 12
 
-    const whereClause = params.category
-      ? `WHERE category = '${params.category}'`
-      : '';
+    const where: any = {};
+    if (params.category) where.category = params.category;
 
-    const events = (await prisma.$queryRawUnsafe(`
-      SELECT * FROM events
-      ${whereClause}
-      ORDER BY RANDOM()
-      LIMIT ${params.count}
-    `)) as unknown as PrismaEvent[];
+    // 1. Get total count for the specified where clause
+    const totalCount = await prisma.event.count({ where });
+
+    if (totalCount === 0) {
+      return res.json({
+        success: true,
+        data: {
+          events: [],
+          total: 0,
+          page: 1,
+          totalPages: 1,
+        },
+        meta: { timestamp: new Date().toISOString() },
+      });
+    }
+
+    // 2. Calculate random offset
+    // We want to pick a starting point such that we can ideally take 'limit' items
+    let randomOffset = Math.floor(Math.random() * totalCount);
+
+    // 3. Fetch events
+    let events: PrismaEvent[] = [];
+
+    if (randomOffset + limit <= totalCount) {
+      // Basic case: we have enough items after the offset
+      events = await prisma.event.findMany({
+        where,
+        skip: randomOffset,
+        take: limit,
+      });
+    } else {
+      // Wrap-around case: we need to combine from end and beginning
+      const endCount = totalCount - randomOffset;
+      const startCount = limit - endCount;
+
+      const [endEvents, startEvents] = await Promise.all([
+        prisma.event.findMany({
+          where,
+          skip: randomOffset,
+          take: endCount,
+        }),
+        prisma.event.findMany({
+          where,
+          skip: 0,
+          take: Math.min(startCount, totalCount), // Ensure we don't over-fetch if limit > totalCount
+        }),
+      ]);
+
+      events = [...endEvents, ...startEvents];
+    }
 
     const response: SearchResponse = {
       success: true,
       data: {
-        events: events.map(transformEvent),
-        total: events.length,
+        events: events
+          .sort(() => Math.random() - 0.5) // Shuffle for better perceived randomness
+          .map(transformEvent),
+        total: totalCount,
         page: 1,
         totalPages: 1,
       },

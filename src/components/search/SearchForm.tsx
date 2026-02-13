@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Search, Calendar, Globe, Tag, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Search, Calendar, Globe, Tag, SlidersHorizontal, ArrowUpDown, Shuffle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +21,9 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { categories, mockCountries } from '@/lib/mocks';
+import { categories } from '@/lib/mocks';
 import { SearchParams } from '@/lib/types';
+import { getCountries } from '@/utils/countries';
 
 const currentYear = new Date().getFullYear();
 
@@ -43,12 +45,15 @@ type SearchFormData = z.infer<typeof searchSchema>;
 
 interface SearchFormProps {
     onSearch: (params: SearchParams) => void;
+    onRandom?: () => void;
     initialValues?: Partial<SearchParams>;
     isLoading?: boolean;
 }
 
-export function SearchForm({ onSearch, initialValues, isLoading }: SearchFormProps) {
-    const { t, locale } = useApp();
+export function SearchForm({ onSearch, onRandom, initialValues, isLoading }: SearchFormProps) {
+    const { t } = useApp();
+
+    const allCountries = useMemo(() => getCountries(), []);
 
     const form = useForm<SearchFormData>({
         resolver: zodResolver(searchSchema),
@@ -61,12 +66,6 @@ export function SearchForm({ onSearch, initialValues, isLoading }: SearchFormPro
             sortOrder: initialValues?.sortOrder || 'desc',
         },
     });
-
-    const getCountryName = (country: typeof mockCountries[0]) => {
-        if (locale === 'ar') return country.nameAr;
-        if (locale === 'fr') return country.nameFr;
-        return country.name;
-    };
 
     const onSubmit = (data: SearchFormData) => {
         const params: SearchParams = {
@@ -173,11 +172,11 @@ export function SearchForm({ onSearch, initialValues, isLoading }: SearchFormPro
                                             <SelectValue placeholder={t('search.countryPlaceholder')} />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent className="bg-popover">
+                                    <SelectContent className="bg-popover max-h-[300px]">
                                         <SelectItem value="all">All Countries</SelectItem>
-                                        {mockCountries.map((country) => (
+                                        {allCountries.map((country) => (
                                             <SelectItem key={country.code} value={country.code}>
-                                                {getCountryName(country)}
+                                                {country.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -186,6 +185,7 @@ export function SearchForm({ onSearch, initialValues, isLoading }: SearchFormPro
                         )}
                     />
                 </div>
+
 
                 <div className="flex flex-col sm:flex-row gap-6 pt-2 border-t border-border/50">
                     <div className="flex-1 grid grid-cols-2 gap-4">
@@ -240,16 +240,30 @@ export function SearchForm({ onSearch, initialValues, isLoading }: SearchFormPro
                         />
                     </div>
 
-                    <div className="flex items-end">
+                    <div className="flex flex-wrap items-end gap-3">
                         <Button
                             type="submit"
                             size="lg"
-                            className="w-full sm:w-auto h-12 px-8 gap-2"
+                            className="flex-1 sm:flex-none h-12 px-8 gap-2"
                             disabled={isLoading || !form.formState.isValid}
                         >
                             <Search className="w-5 h-5" />
                             {t('search.submit')}
                         </Button>
+
+                        {onRandom && (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="lg"
+                                onClick={onRandom}
+                                className="flex-1 sm:flex-none h-12 px-8 gap-2 group transition-all"
+                                disabled={isLoading}
+                            >
+                                <Shuffle className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                                Random
+                            </Button>
+                        )}
                     </div>
                 </div>
             </form>

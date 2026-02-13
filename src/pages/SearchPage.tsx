@@ -7,7 +7,7 @@ import { Layout } from '@/components/Layout';
 import { SearchForm } from '@/components/search/SearchForm';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchPagination } from '@/components/search/SearchPagination';
-import { searchEvents } from '@/config/api';
+import { searchEvents, getRandomEvents } from '@/config/api';
 import { Event, SearchParams } from '@/lib/types';
 import { Helmet } from 'react-helmet-async';
 import { buildTitle, buildDescription, buildCanonicalUrl } from '@/utils/seo';
@@ -21,6 +21,8 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [isRandomMode, setIsRandomMode] = useState(false);
+  const [randomKey, setRandomKey] = useState(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -39,6 +41,8 @@ export default function SearchPage() {
   }, [searchParams]);
 
   const handleSearch = useCallback(async (params: SearchParams) => {
+    setIsRandomMode(false); // Reset random mode on normal search
+
     // Update URL params
     const newUrlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -91,6 +95,31 @@ export default function SearchPage() {
       setLoading(false);
     }
   }, [setSearchParams, t]);
+
+  const handleRandomSearch = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsRandomMode(true);
+      setRandomKey(prev => prev + 1); // Force re-animation
+      setEvents([]); // Clear previous results to show loading state
+
+      const response = await getRandomEvents(12);
+
+      if (response.success) {
+        setEvents(response.data.events);
+        setTotal(response.data.total);
+        setTotalPages(1); // Random results are usually single page
+      } else {
+        setError(response.error || t('common.error'));
+      }
+    } catch (err) {
+      setError(t('common.error'));
+      console.error('Random search error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
 
   // Initial fetch or fetch on URL change
   const currentParams = getParamsFromUrl();
@@ -156,6 +185,7 @@ export default function SearchPage() {
             >
               <SearchForm
                 onSearch={handleSearch}
+                onRandom={handleRandomSearch}
                 initialValues={currentParams}
                 isLoading={loading}
               />
@@ -163,9 +193,9 @@ export default function SearchPage() {
 
             {/* Results Section */}
             <AnimatePresence mode="wait">
-              {currentParams.year || currentParams.query ? (
+              {currentParams.year || currentParams.query || isRandomMode ? (
                 <motion.div
-                  key="results"
+                  key={isRandomMode ? `random-${randomKey}` : "results"}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -176,15 +206,18 @@ export default function SearchPage() {
                     loading={loading}
                     error={error}
                     total={total}
-                    onRetry={() => handleSearch(currentParams)}
+                    onRetry={() => isRandomMode ? handleRandomSearch() : handleSearch(currentParams)}
+                    isRandomMode={isRandomMode}
                   />
 
-                  <SearchPagination
-                    currentPage={currentParams.page || 1}
-                    totalPages={totalPages}
-                    onPageChange={onPageChange}
-                    isLoading={loading}
-                  />
+                  {!isRandomMode && (
+                    <SearchPagination
+                      currentPage={currentParams.page || 1}
+                      totalPages={totalPages}
+                      onPageChange={onPageChange}
+                      isLoading={loading}
+                    />
+                  )}
                 </motion.div>
               ) : (
                 <motion.div

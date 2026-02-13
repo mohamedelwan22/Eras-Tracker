@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SearchResultCard } from './SearchResultCard';
 import { Event } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
-import { Search, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, AlertCircle, RefreshCw, Shuffle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SearchResultsProps {
@@ -11,9 +11,10 @@ interface SearchResultsProps {
     error: string | null;
     total: number;
     onRetry: () => void;
+    isRandomMode?: boolean;
 }
 
-export function SearchResults({ events, loading, error, total, onRetry }: SearchResultsProps) {
+export function SearchResults({ events, loading, error, total, onRetry, isRandomMode }: SearchResultsProps) {
     const { t } = useApp();
 
     return (
@@ -67,9 +68,18 @@ export function SearchResults({ events, loading, error, total, onRetry }: Search
             ) : (
                 <>
                     <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-lg font-semibold text-muted-foreground">
-                            {t('results.found', { count: total })}
-                        </h2>
+                        {isRandomMode ? (
+                            <div className="flex items-center gap-2">
+                                <Shuffle className="w-5 h-5 text-primary" />
+                                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                                    Random Discovery Results
+                                </h2>
+                            </div>
+                        ) : (
+                            <h2 className="text-lg font-semibold text-muted-foreground">
+                                {t('results.found', { count: total })}
+                            </h2>
+                        )}
                     </div>
 
                     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>

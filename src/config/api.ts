@@ -45,10 +45,8 @@ export async function getOnThisDay(month: number, day: number): Promise<OnThisDa
     return response.data;
 }
 
-export async function getRandomEvents(count: number = 5): Promise<SearchResponse> {
-    const response = await api.get<SearchResponse>('/random', {
-        params: { count }
-    });
+export async function getRandomEvents(limit: number = 10): Promise<SearchResponse> {
+    const response = await api.get<SearchResponse>(`/random?limit=${limit}&_t=${Date.now()}`);
     return response.data;
 }
 
